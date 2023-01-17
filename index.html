@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> Snake Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&display=swap" rel="stylesheet">
+  <style type="text/css">
+  * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  }
+  body {
+  font-family: 'Gloria Hallelujah', arial;
+  position:fixed;
+  }
+  .hag {
+  color:gray;
+  position:relative;
+  top:30px;
+  font-size:15px;
+  display:flex;
+  text-align:center;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  }
+  .main-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color:white;
+  }
+  
+  .snake-board {
+  display: grid;
+  width: 95vw;
+  height: 95vw;
+  box-shadow:10px 10px 30px rgba(0,0,0,0.1);
+  border-radius:10%;
+  background-color:white;
+  margin: 0px 0px 12px 0px;
+  grid-template-rows: repeat(28, 1fr);
+  grid-template-columns: repeat(28, 1fr);
+  }
+  
+  .keycontrol {
+  width: 95vw;
+  height: 30vh;
+  position: relative;
+  }
+  
+  .btn {
+  position: absolute;
+  width: 29vw;
+  background-color:white;
+  color:gray;
+  height: 10vh;
+  box-shadow:10px 10px 30px rgba(0,0,0,0.1);
+  border-radius:10%;
+  font-weight: 900;
+  font-size: 18px;
+  border:none;
+  font-family: 'Gloria Hallelujah', arial;
+  }
+  
+  #UP {
+  top: 4vh;
+  left: 33vw;
+  }
+  
+  #DOWN {
+  bottom: 4vh;
+  left: 33vw;
+  }
+  
+  #RIGHT {
+  top: 10vh;
+  right: 2vw;
+  }
+  
+  #LEFT {
+  top: 10vh;
+  left: 2vw;
+  }
+  
+  .head {
+  background-color:yellowgreen;
+  z-index:3;
+  border-radius:10%;
+  }
+  
+  .snake{
+  background-color: #ACED60;
+  border:1px solid yellowgreen;
+  z-index:2;
+  }
+  
+  .food {
+  background-color: #FF0A0A;
+  z-index:1;
+  border-radius:30%;
+  }
+  </style>
+</head>
+
+<body>
+ <div class="hag" > <h1>THE ULTIMATE SNAKE GAME</h1></div>
+  <div class="main-container">
+    <div class="snake-board">
+    </div>
+    <div class="keycontrol">
+      <button class="btn" id="UP">UP</button>
+      <button class="btn" id="DOWN">DOWN</button>
+      <button class="btn" id="LEFT">LEFT</button>
+      <button class="btn" id="RIGHT">RIGHT</button>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+  // Getting the reference of dom 
+  // elements
+  const btnUp = document.querySelector('#UP');
+  const btnDown = document.querySelector('#DOWN');
+  const btnLeft = document.querySelector('#LEFT');
+  const btnRight = document.querySelector('#RIGHT');
+  const board = document.querySelector(".snake-board");
+  
+  // Variables
+  let up = false;
+  let down = false;
+  let left = false;
+  let right = false;
+  
+  let speed = 10;
+  let lastPaintTime = 0;
+  
+  // Snake body array
+  let snakeArr = [{ x: 14, y: 3 }];
+  let food = { x: Math.round(Math.random() * (26 - 1) + 1), y: Math.round(Math.random() * (26 - 1) + 1) };
+  // Direction
+  let inputDir = { x: 0, y: 0 };
+  
+  // Main function for game loop
+  function main(ctime) {
+  window.requestAnimationFrame(main);
+  if ((ctime - lastPaintTime) / 1000 < 1 / speed) {
+  return;
+  }
+  lastPaintTime = ctime;
+  gameEngine();
+  
+  }
+  
+  
+  function gameEngine() {
+  
+  // Updating the snake array
+  
+  if (isCollide(snakeArr)) {
+  inputDir = { x: 0, y: 0 };
+  alert("Game over!");
+  snakeArr = [{ x: 14, y: 3 }];
+  }
+  
+  if (snakeArr[0].x === food.x && snakeArr[0].y === food.y) {
+  snakeArr.unshift({ x: snakeArr[0].x + inputDir.x, y: snakeArr[0].y + inputDir.y });
+  let a = 2;
+  let b = 20;
+  
+  let j = 1;
+  while (snakeArr[j].x === food.x && snakeArr[j].y === food.y) {
+  food = { x: Math.round(Math.random() * (b - a) + a), y: Math.round(Math.random() * (b - a) + a) };
+  j++;
+  }
+  }
+  
+  for (let i = snakeArr.length - 2; i >= 0; i--) {
+  snakeArr[i + 1] = { ...snakeArr[i] };
+  }
+  
+  snakeArr[0].x += inputDir.x;
+  snakeArr[0].y += inputDir.y;
+  
+  // Display snake head and food
+  board.innerHTML = "";
+  snakeArr.forEach((e, index) => {
+  let snakeElement = document.createElement("div");
+  snakeElement.style.gridRowStart = e.y;
+  snakeElement.style.gridColumnStart = e.x;
+  if (index === 0) {
+  snakeElement.classList.add("head");
+  }
+  else {
+  snakeElement.classList.add("snake");
+  }
+  board.appendChild(snakeElement);
+  });
+  
+  let foodElement = document.createElement("div");
+  foodElement.style.gridRowStart = food.y;
+  foodElement.style.gridColumnStart = food.x;
+  foodElement.classList.add("food");
+  board.appendChild(foodElement);
+  
+  }
+  
+  function isCollide(snakeArr) {
+  
+  
+  for (let i = 1; i < snakeArr.length; i++) {
+  if (snakeArr[i].x === snakeArr[0].x && snakeArr[i].y === snakeArr[0].y) {
+  return true;
+  }
+  }
+  
+  if (snakeArr[0].x >= 28 || snakeArr[0].x <= 0 || snakeArr[0].y >= 28 || snakeArr[0].y <= 0) {
+  return true;
+  }
+  
+  return false;
+  }
+  
+  
+  window.requestAnimationFrame(main);
+  
+  btnUp.addEventListener("click", () => {
+  inputDir.x = 0;
+  inputDir.y = -1;
+  });
+  
+  btnDown.addEventListener("click", () => {
+  inputDir.x = 0;
+  inputDir.y = 1;
+  });
+  
+  btnLeft.addEventListener("click", () => {
+  inputDir.x = -1;
+  inputDir.y = 0;
+  });
+  btnRight.addEventListener("click", () => {
+  inputDir.x = 1;
+  inputDir.y = 0;
+  });
+  </script>
+</body>
+
+</html>
